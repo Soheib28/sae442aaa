@@ -14,14 +14,13 @@ ENCODED_PASSWORD = quote(GIT_PASSWORD)
 
 PROMPT_TEMPLATE = (
     "Fais uniquement les exercices dans ce que je te copie colle, "
-    "dans ce chat, code uniquement en C89, donne-moi tous les codes en texte brut "
+    "dans ce chat, code uniquement en Java (version 17), donne-moi tous les codes en texte brut "
     "directement afin que je copie-colle, et mets bien le titre de l'exo à chaque fois. "
-    "Ne mets pas de commentaires. Utilise la documentation disponible dans : "
-    "https://iut-fbleau.fr/sitebp/dev11bis/"
+    "Ne mets pas de commentaires. Utilise et aide toi de la documentation disponible dans : "
+    "https://iut-fbleau.fr/sitebp/dev21/"
 )
 
 def fetch_page_content(url):
-    """Récupère et extrait le contenu principal de la page spécifiée."""
     try:
         response = requests.get(url)
         response.raise_for_status()
@@ -37,7 +36,6 @@ def fetch_page_content(url):
         return None
 
 def solve_exercise_with_perplexity(exercise_text):
-    """Envoie l'exercice au modèle Perplexity pour obtenir une solution."""
     try:
         url = "https://api.perplexity.ai/chat/completions"
         headers = {
@@ -62,8 +60,7 @@ def solve_exercise_with_perplexity(exercise_text):
         return None
 
 def save_exercise_to_file(title, content):
-    """Enregistre la solution de l'exercice dans un fichier."""
-    filename = f"{title}.c"
+    filename = f"{title}.java"
     try:
         with open(filename, "w", encoding="utf-8") as f:
             f.write(content)
@@ -74,7 +71,6 @@ def save_exercise_to_file(title, content):
         return None
 
 def sync_and_push_to_git():
-    """Synchronise et pousse les modifications dans le dépôt Git."""
     try:
         repo = git.Repo(os.getcwd())
         remote_url = f"https://{GIT_USERNAME}:{ENCODED_PASSWORD}@{GIT_REPO_URL}"
@@ -85,14 +81,13 @@ def sync_and_push_to_git():
         except git.exc.GitCommandError:
             print("Pas de stash à appliquer.")
         repo.git.add(A=True)
-        repo.index.commit("Ajout des exercices")
+        repo.index.commit("Ajout des exercices Java")
         repo.git.push(remote_url, 'main')
         print("Les fichiers ont été poussés avec succès.")
     except Exception as e:
         print(f"Erreur lors du push Git : {e}")
 
 def process_exercises(url):
-    """Processus principal pour traiter les exercices d'une URL donnée."""
     print("Récupération du contenu de la page...")
     page_content = fetch_page_content(url)
     if not page_content:
@@ -113,7 +108,7 @@ def process_exercises(url):
         print("Aucun exercice n'a été traité avec succès. Abandon du push Git.")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Résout les exercices d'une URL donnée")
+    parser = argparse.ArgumentParser(description="Résout les exercices Java d'une URL donnée")
     parser.add_argument("--url", required=True, help="URL de la page contenant les exercices")
     args = parser.parse_args()
     process_exercises(args.url)
